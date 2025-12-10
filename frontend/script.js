@@ -7,7 +7,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 let startMarker, endMarker;
-let routeLayer;
+let routeLayers = [];
 
 // Elegir puntos al hacer clic
 map.on('click', function(e) {
@@ -30,15 +30,37 @@ async function getRoute() {
 
     const res = await fetch(`/api/v1/routes/?start=${start}&end=${end}`);
     const data = await res.json();
+    console.log('data', data.length, data)
 
-    if (routeLayer) map.removeLayer(routeLayer);
+    // Eliminar rutas anteriores
+    routeLayers.forEach(layer => map.removeLayer(layer));
+    routeLayers = [];
 
-    // Dibujar la primera ruta devuelta por el backend
-    if (data.length > 0) {
-        const coords = data[0].geometry.coordinates.map(c => [c[1], c[0]]);
-        routeLayer = L.polyline(coords, {color: 'blue'}).addTo(map);
-        map.fitBounds(routeLayer.getBounds());
+    // Colores para distinguir rutas
+    const colors = ["blue", "red", "green"];
+
+    let allCoords = [];  // Para calcular bounds de todas las rutas
+
+    data.forEach((route, index) => {
+        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        allCoords = allCoords.concat(coords);
+
+        const polyline = L.polyline(coords, {
+            color: colors[index % colors.length],
+            weight: 5,
+            opacity: 0.8
+        }).addTo(map);
+
+        // Puedes guardar info adicional en el polyline
+        polyline.routeId = route.id;
+        polyline.safetyIndex = route.safety_index;
+
+        routeLayers.push(polyline);
+    });
+
+    if (allCoords.length > 0) {
+        map.fitBounds(allCoords);
     }
 }
-
+console.log("script cargado");
 document.getElementById("routeBtn").addEventListener("click", getRoute);
