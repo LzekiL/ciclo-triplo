@@ -7,6 +7,9 @@ services:
     container_name: ciclo-backend
     ports:
       - "8000:8000"
+    networks:
+      - ciclo-net
+
     volumes:
       # Código backend en caliente
       - ./backend/app:/app/app
@@ -19,3 +22,6 @@ services:
       - ENV=development
 
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+networks:
+  ciclo-net:
+    external: true

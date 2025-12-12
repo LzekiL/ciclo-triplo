@@ -23,16 +23,16 @@ async def get_osrm_routes(start, end):
     start = (lat, lon)
     end   = (lat, lon)
     """
-    url = f"{OSRM_URL}/route/v1/driving/{start[1]},{start[0]};{end[1]},{end[0]}"
-
+    url = f"http://osrm-bike:5000/route/v1/bicycle/{start[1]},{start[0]};{end[1]},{end[0]}"
     params = {
         "alternatives": "true",
         "geometries": "geojson",
-        "steps": "true"
+        "steps": "true",
+        "overview": "full"
     }
 
     try:
-        async with httpx.AsyncClient(timeout=8.0) as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             r = await client.get(url, params=params)
             r.raise_for_status()
             data = r.json()
@@ -42,23 +42,18 @@ async def get_osrm_routes(start, end):
         return []
 
     routes = data.get("routes", [])
-    print("OSRM devolvió rutas:", len(routes))
-
-
-    # Si OSRM no devuelve nada
+    print('routes en services', len(routes), routes)
     if not routes:
         return []
 
-    # Normalizamos rutas
     normalized = [normalize_route(r, idx) for idx, r in enumerate(routes)]
 
-    # Si solo hay una ruta → generamos una alternativa artificial
+    # Generar alternativa artificial si solo hay una ruta
     if len(normalized) == 1:
         alt_route = normalized[0].copy()
         alt_route["id"] = 1
-        alt_route["distance"] *= 1.04  # +4% distancia
-        alt_route["duration"] *= 1.05  # +5% tiempo
+        alt_route["distance"] *= 1.04
+        alt_route["duration"] *= 1.05
         normalized.append(alt_route)
 
-    # Maximum 3 routes
     return normalized[:3]

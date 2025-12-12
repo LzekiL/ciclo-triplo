@@ -1,6 +1,5 @@
-// Crear mapa centrado en Madrid
-const map = L.map('map').setView([40.4168, -3.7038], 14);
-
+// Ahora (Castilla y León)
+const map = L.map('map').setView([41.7, -4.5], 8);
 // Capa de mapa base
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
