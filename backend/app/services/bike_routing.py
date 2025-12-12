@@ -42,7 +42,7 @@ async def calculate_bike_safety_index_step_async(step):
     """
     lat, lon = step["geometry"]["coordinates"][0][1], step["geometry"]["coordinates"][0][0]
     tags = await fetch_osm_tags_async(lat, lon)
-    print('tags', tags)
+    # print('tags', tags)
 
     score = 1.0
     highway = tags.get("highway", "")
@@ -99,10 +99,10 @@ async def calculate_bike_safety_index_async(route):
         key = (round(lat, 3), round(lon, 3))  # cache más amplia
 
         if key in local_cache:
-            print("HIT CACHE:", key)
+            # print("HIT CACHE:", key)
             return local_cache[key]
 
-        print("MISS:", key)
+        # print("MISS:", key)
         score = await calculate_bike_safety_index_step_async(step)
         local_cache[key] = score
         return score

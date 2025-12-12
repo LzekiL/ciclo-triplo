@@ -42,7 +42,7 @@ async def get_osrm_routes(start, end):
         return []
 
     routes = data.get("routes", [])
-    print('routes en services', len(routes), routes)
+    print('routes en services', len(routes))
     if not routes:
         return []
 
@@ -55,5 +55,5 @@ async def get_osrm_routes(start, end):
         alt_route["distance"] *= 1.04
         alt_route["duration"] *= 1.05
         normalized.append(alt_route)
-
+    # print('normalized',normalized )
     return normalized[:3]
